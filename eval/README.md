@@ -28,15 +28,15 @@ output files:
 In order to access this bucket, we need to create a service account:
 
     gcloud iam service-accounts list # list existing service accounts
-    gcloud iam service-accounts create <SHORT-NAME> --display-name="<LONG DISPLAY NAME>"
+    gcloud iam service-accounts create <short-name> --display-name="<LONG DISPLAY NAME>"
 
 We then need to configure the necessary permission and create a service account key:
 
     gsutil iam ch \
-        serviceAccount:<SHORT-NAME>@<PROJECT_ID>.iam.gserviceaccount.com:objectAdmin \
+        serviceAccount:<short-name>@<PROJECT_ID>.iam.gserviceaccount.com:objectAdmin \
         gs://<BUCKET_NAME>/
     gcloud iam service-accounts keys create \
-        --iam-account <SHORT-NAME>@<PROJECT_ID>.iam.gserviceaccount.com \
+        --iam-account <short-name>@<PROJECT_ID>.iam.gserviceaccount.com \
         service-account.json
 
 The output file "service-account.json" contains sensitive information,
@@ -44,3 +44,10 @@ and should not be committed to git or added inside a container.
 See this
 [documentation](https://cloud.google.com/iam/docs/creating-managing-service-account-keys)
 for best practices on managing the keys.
+
+Specifically, we will use
+[Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/)
+to handle our key:
+
+    kubectl get secret # list secret
+    kubectl create secret generic <app-key> --from-file service-account.json
