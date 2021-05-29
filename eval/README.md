@@ -15,7 +15,7 @@ backend.
 This allows k8s to scale to thousands of pods.
 
 
-## Step 0. Setting up Google Cloud Storage Bucket and Access
+## Step 1. Setting up Google Cloud Storage Bucket and Access
 
 On ng-eht-cloud, both storage and service accounts are set up for you.
 You may skip this step if you want to work on data on ng-eht-cloud.
@@ -51,3 +51,18 @@ to handle our key:
 
     kubectl get secret # list secret
     kubectl create secret generic <app-key> --from-file service-account.json
+
+
+## Step 2. Setting up a Work Queue
+
+On ng-eht-cloud, a redis based work queue is set up.
+You may skip this step if you want to work on data on ng-eht-cloud.
+
+We follow this
+[example](https://kubernetes.io/docs/tasks/job/fine-parallel-processing-work-queue/)
+to use Redis for a work queue.
+It is straightforward to deploy the redis YAML files come with this
+repository:
+
+    kubectl apply -f redis-pod.yaml
+    kubectl apply -f redis-service.yaml
