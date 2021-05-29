@@ -15,7 +15,10 @@ backend.
 This allows k8s to scale to thousands of pods.
 
 
-## Step 1.  Setup Google Cloud Storage Bucket and Access
+## Step 0. Setting up Google Cloud Storage Bucket and Access
+
+On ng-eht-cloud, both storage and service accounts are set up for you.
+You may skip this step if you want to work on data on ng-eht-cloud.
 
 We first setup a Google Cloud Storage Bucket to stage the input and
 output files:
@@ -29,8 +32,12 @@ In order to access this bucket, we need to create a service account:
 
 We then need to configure the necessary permission and create a service account key:
 
-    gsutils iam ch serviceAccount:<SHORT-NAME>@<PROJECT_ID>.iam.gserviceaccount.com:objectAdmin gs://<BUCKET_NAME>/
-    gcloud iam service-accounts keys create --iam-account <SHORT-NAME>@<PROJECT_ID>.iam.gserviceaccount.com service-account.json
+    gsutil iam ch \
+        serviceAccount:<SHORT-NAME>@<PROJECT_ID>.iam.gserviceaccount.com:objectAdmin \
+        gs://<BUCKET_NAME>/
+    gcloud iam service-accounts keys create \
+        --iam-account <SHORT-NAME>@<PROJECT_ID>.iam.gserviceaccount.com \
+        service-account.json
 
 The output file "service-account.json" contains sensitive information,
 and should not be committed to git or added inside a container.
