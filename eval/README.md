@@ -53,7 +53,7 @@ to handle our key:
     kubectl create secret generic <app-key> --from-file service-account.json
 
 
-## Step 2. Setting up a Work Queue
+## Step 2. Setting up and Testing Redis for Work Queue
 
 On ng-eht-cloud, a redis based work queue is set up.
 You may skip this step if you want to work on data on ng-eht-cloud.
@@ -66,3 +66,25 @@ repository:
 
     kubectl apply -f redis-pod.yaml
     kubectl apply -f redis-service.yaml
+
+You may test redis by:
+
+    kubectl run test -it --image redis --command '/bin/sh'
+
+    # redis-cli -h redis
+    redis:6379> rpush job2 "apple"
+    (integer) 1
+    redis:6379> rpush job2 "banana"
+    (integer) 2
+    redis:6379> lrange job2 0 -1
+    1) "apple"
+    2) "banana"
+
+After you are done, you may connect back to the running test pod by:
+
+    kubectl exec test -it -- '/bin/bash'
+
+or you may delete the test pod by:
+
+    kubectl get pods
+    kubectl delete pod test
