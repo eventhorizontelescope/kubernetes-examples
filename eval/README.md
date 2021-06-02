@@ -15,9 +15,9 @@ backend.
 This allows k8s to scale to thousands of pods.
 
 
-## Step 1. Setting up Google Cloud Storage Bucket and Access
+## Step 1. Setting up Google Cloud Storage Bucket
 
-On ng-eht-cloud, both storage and service accounts are set up for you.
+On ng-eht-cloud, the storage is set up for you.
 You may skip this step if you want to work on data on ng-eht-cloud.
 
 We first setup a Google Cloud Storage Bucket to stage the input and
@@ -29,6 +29,14 @@ In order to access this bucket, we need to create a service account:
 
     gcloud iam service-accounts list # list existing service accounts
     gcloud iam service-accounts create <short-name> --display-name="<LONG DISPLAY NAME>"
+
+## Step 2. Setting up GCS Access
+
+On ng-eht-cloud, we currently use method 2b to simplify GCS access.
+The solution is still very salable, although we may be able to reduce
+cost by using method 2a.
+
+### Method 2a. Using Service Account
 
 We then need to configure the necessary permission and create a service account key:
 
@@ -52,8 +60,25 @@ to handle our key:
     kubectl get secret # list secret
     kubectl create secret generic <app-key> --from-file service-account.json
 
+### Method 2b. Mounting GCS to Continer with `gcsfuse`
 
-## Step 2. Setting up and Testing Redis for Work Queue
+A simplier method is to use k8s' `lifecycle` to pre-mount the Google
+Cloud Storage using gcsfuse.
+We provide a sample YAML file "gcs-mount.yaml" for this.
+
+Please replace `<BUCKET_NAME>` in that file with the proper GCS bucket
+name, and then run:
+
+    kubectl apply -f gcs-mount.yaml
+
+One can then view the GCS bucket inside the container:
+
+    kubectl exec gcs-mount-<ID> -it -- '/bin/sh'
+    # ls /mnt/eval/
+    index input
+
+
+## Step 3. Setting up and Testing Redis for Work Queue
 
 On ng-eht-cloud, a redis based work queue is set up.
 You may skip this step if you want to work on data on ng-eht-cloud.
