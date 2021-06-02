@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: img-eval-job
+spec:
+  parallelism: 16
+
+  template:
+    metadata:
+      name: img-eval-job
+    spec:
+      volumes:
+        - name: "service-account"
+          secret:
+            secretName: "img-eval"
+
+      containers:
+        - name: img-eval
+          image: rndsrc/eval
+
+          command: [ "bash" , "-ic", "./driver.py" ]
+
+          volumeMounts:
+            - name: "service-account"
+              mountPath: "/var/run/secret/cloud.google.com"
+
+          env:
+            - name: "GOOGLE_APPLICATION_CREDENTIALS"
+              value: "/var/run/secret/cloud.google.com/service-account.json"
+
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - SYS_ADMIN
+          lifecycle:
+            postStart:
+              exec:
+                command: ["gcsfuse", "--implicit-dirs", "<BUCKET_NAME>", "/mnt/eval"]
+            preStop:
+              exec:
+                command: ["fusermount", "-u", "/mnt/eval"]
+
+      restartPolicy: OnFailure
