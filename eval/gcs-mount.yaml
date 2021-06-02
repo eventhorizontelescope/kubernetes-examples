@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcs-mount
+spec:
+  selector:
+    matchLabels:
+      app: gcs-mount
+
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: gcs-mount
+    spec:
+      containers:
+        - name: gcs-mount
+          image: ekino/gcsfuse
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - SYS_ADMIN
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - "sh"
+                  - "-c"
+                  - |
+                    mkdir /mnt/eval
+                    gcsfuse -o nonempty --implicit-dirs <BUCKET_NAME> /mnt/eval
+            preStop:
+              exec:
+                command: ["fusermount", "-u", "/mnt/eval"]
