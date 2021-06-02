@@ -15,9 +15,22 @@ spec:
         app: img-eval
     spec:
 
+      volumes:
+        - name: "service-account"
+          secret:
+            secretName: "img-eval"
+
       containers:
         - name: img-eval
           image: rndsrc/eval
+
+          volumeMounts:
+            - name: "service-account"
+              mountPath: "/var/run/secret/cloud.google.com"
+
+          env:
+            - name: "GOOGLE_APPLICATION_CREDENTIALS"
+              value: "/var/run/secret/cloud.google.com/service-account.json"
 
           # Just spin & wait forever
           command: [ "/bin/bash", "-c", "--" ]
