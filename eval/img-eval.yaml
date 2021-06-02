@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: img-eval
+spec:
+  selector:
+    matchLabels:
+      app: img-eval
+
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: img-eval
+    spec:
+
+      containers:
+        - name: img-eval
+          image: rndsrc/eval
+
+          # Just spin & wait forever
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "while true; do sleep 30; done;" ]
+
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - SYS_ADMIN
+          lifecycle:
+            postStart:
+              exec:
+                command: ["gcsfuse", "--implicit-dirs", "<BUCKET_NAME>", "/mnt/eval"]
+            preStop:
+              exec:
+                command: ["fusermount", "-u", "/mnt/eval"]
